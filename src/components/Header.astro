@@ -1,0 +1,22 @@
+---
+import { site } from '../config/environment';
+
+const links = [
+  { href: '#problema', label: 'Problema' },
+  { href: '#solucion', label: 'Solución' },
+  { href: '#procedimiento', label: 'Procedimiento' },
+  { href: '#analisis', label: 'Ventajas y riesgos' },
+  { href: '#prototipo', label: 'Prototipo' },
+  { href: '#video', label: 'Video' },
+  { href: '#entregas', label: 'Conclusiones' },
+];
+---
+
+<header class="site-header">
+  <div class="container inner">
+    <a class="brand" href="#inicio">{site.title} <span>· Frutos de Guatemala</span></a>
+    <nav class="nav" aria-label="Navegación principal">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+  </div>
+</header>

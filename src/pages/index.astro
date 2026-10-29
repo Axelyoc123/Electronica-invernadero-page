@@ -1,0 +1,227 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Section from '../components/Section.astro';
+import ImagePlaceholder from '../components/ImagePlaceholder.astro';
+import DriveVideo from '../components/DriveVideo.astro';
+import { site } from '../config/environment';
+import {
+  hero,
+  problem,
+  solution,
+  components,
+  steps,
+  pros,
+  cons,
+  risks,
+  prototype,
+  deliveries,
+  conclusions,
+} from '../data/content';
+---
+
+<Layout>
+  <Header />
+
+  <main id="inicio">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container grid">
+        <div>
+          <span class="eyebrow">{hero.eyebrow}</span>
+          <h1>{hero.title}</h1>
+          <p class="lead">{hero.lead}</p>
+          <ul class="meta">
+            <li>{site.university}</li>
+            <li>{site.course} · {site.cycle}</li>
+            <li>Zacapa, Guatemala</li>
+          </ul>
+          <a class="btn" href="#procedimiento">Ver el procedimiento</a>
+          <a class="btn ghost" href="#video">Ver video</a>
+        </div>
+        <ImagePlaceholder {...hero.shot} />
+      </div>
+    </section>
+
+    <!-- PROBLEMA -->
+    <Section id="problema" kicker="Contexto" title="El problema" intro={problem.intro}>
+      <div class="cards">
+        {
+          problem.needs.map((n) => (
+            <article class="card">
+              <span class="icon">{n.icon}</span>
+              <h3>{n.title}</h3>
+              <p>{n.text}</p>
+            </article>
+          ))
+        }
+      </div>
+      <h3 style="margin-top:2.5rem">Objetivos del proyecto</h3>
+      <ul class="check">
+        {problem.objectives.map((o) => <li>{o}</li>)}
+      </ul>
+    </Section>
+
+    <!-- SOLUCIÓN -->
+    <Section id="solucion" kicker="Propuesta" title="La solución" intro={solution.intro} alt>
+      <div class="cards">
+        {
+          solution.layers.map((l, i) => (
+            <article class="card red">
+              <h3>{i + 1}. {l.title}</h3>
+              <p>{l.text}</p>
+            </article>
+          ))
+        }
+      </div>
+      <div style="margin-top:2rem">
+        <ImagePlaceholder {...solution.diagram} />
+      </div>
+
+      <h3 style="margin-top:3rem">{solution.cycleTitle}</h3>
+      <p>{solution.cycleIntro}</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Condición</th><th>Acción</th><th>Beneficio</th></tr>
+          </thead>
+          <tbody>
+            {
+              solution.rules.map((r) => (
+                <tr>
+                  <td><strong>{r.sensor}</strong></td>
+                  <td>{r.condition}</td>
+                  <td>{r.action}</td>
+                  <td>{r.benefit}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:3rem">Materiales y componentes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Componente</th><th>Función</th><th>Estado</th></tr></thead>
+          <tbody>
+            {
+              components.map((c) => (
+                <tr>
+                  <td><strong>{c.name}</strong></td>
+                  <td>{c.role}</td>
+                  <td><span class={`badge ${c.status === 'Integrado' ? 'media' : 'baja'}`}>{c.status}</span></td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </Section>
+
+    <!-- PROCEDIMIENTO -->
+    <Section
+      id="procedimiento"
+      kicker="Paso a paso"
+      title="Procedimiento realizado"
+      intro="Resumen del proceso seguido desde el análisis de requerimientos hasta la validación del prototipo."
+    >
+      {
+        steps.map((s, i) => (
+          <div class="step">
+            <div class="num">{i + 1}</div>
+            <div>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+              {s.bullets && (
+                <ul class="check">
+                  {s.bullets.map((b) => <li>{b}</li>)}
+                </ul>
+              )}
+              <div
+                class:list={[
+                  'shots',
+                  {
+                    'cols-2': s.shots.length === 2,
+                    'cols-3': s.shots.length >= 3,
+                    single: s.shots.length === 1,
+                    narrow: s.shots.length === 1 && ['photoTall', 'vertical'].includes(s.shots[0].size ?? ''),
+                  },
+                ]}
+              >
+                {s.shots.map((shot) => <ImagePlaceholder {...shot} />)}
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </Section>
+
+    <!-- VENTAJAS, DESVENTAJAS Y RIESGOS -->
+    <Section id="analisis" kicker="Análisis" title="Ventajas, desventajas y riesgos" alt>
+      <div class="two-col">
+        <div class="card">
+          <h3>Ventajas</h3>
+          <ul class="check">{pros.map((p) => <li>{p}</li>)}</ul>
+        </div>
+        <div class="card red">
+          <h3>Desventajas</h3>
+          <ul class="check red">{cons.map((c) => <li>{c}</li>)}</ul>
+        </div>
+      </div>
+
+      <h3 style="margin-top:3rem">Matriz de riesgos</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Riesgo</th><th>Probabilidad</th><th>Impacto</th><th>Mitigación</th></tr>
+          </thead>
+          <tbody>
+            {
+              risks.map((r) => (
+                <tr>
+                  <td><strong>{r.risk}</strong></td>
+                  <td><span class={`badge ${r.prob}`}>{r.prob}</span></td>
+                  <td><span class={`badge ${r.impact}`}>{r.impact}</span></td>
+                  <td>{r.mitigation}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </Section>
+
+    <!-- PROTOTIPO -->
+    <Section id="prototipo" kicker="Resultado" title="Prototipo funcional" intro={prototype.intro}>
+      <div class="shots cols-2">
+        {prototype.shots.map((s) => <ImagePlaceholder {...s} />)}
+      </div>
+    </Section>
+
+    <!-- VIDEO -->
+    <Section id="video" kicker="Demostración" title="Video del funcionamiento" alt>
+      {
+        site.videoEmbedUrl ? (
+          <iframe
+            class="video"
+            src={site.videoEmbedUrl}
+            title="Video del funcionamiento del prototipo"
+            allowfullscreen
+            loading="lazy"
+          />
+        ) : (
+          <DriveVideo />
+        )
+      }
+    </Section>
+
+    <!-- ENTREGAS -->
+    <Section id="entregas" title="Conclusiones" >
+      <ul class="check">{conclusions.map((c) => <li>{c}</li>)}</ul>
+    </Section>
+  </main>
+
+  <Footer />
+</Layout>

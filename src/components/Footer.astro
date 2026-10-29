@@ -1,0 +1,22 @@
+---
+import { site } from '../config/environment';
+---
+
+<footer class="site-footer">
+  <div class="container grid">
+    <div>
+      <h4>{site.university}</h4>
+      <p>
+        {site.course} · {site.cycle} · {site.year}<br />
+        Proyecto de automatización del invernadero de Frutos de Guatemala (Zacapa).
+      </p>
+      {site.repoUrl && <p><a href={site.repoUrl}>Ver repositorio</a></p>}
+    </div>
+    <div>
+      <h4>Integrantes</h4>
+      <ul>
+        {site.team.map((m) => <li>{m.name} · {m.carnet}</li>)}
+      </ul>
+    </div>
+  </div>
+</footer>

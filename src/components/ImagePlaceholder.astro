@@ -1,0 +1,41 @@
+---
+import { imageSizes, type ImageSize } from '../config/environment';
+import { asset } from '../utils/asset';
+
+interface Props {
+  /** Qué se muestra / qué se debe capturar (también es el texto alternativo) */
+  label: string;
+  /** Tamaño recomendado: hero | wide | detail | square | vertical | photo | photoTall */
+  size?: ImageSize;
+  /** Archivo dentro de /public/images (ej. "paso1.jpg"). Si se omite, se muestra el espacio vacío. */
+  src?: string;
+  /** Texto debajo de la imagen */
+  caption?: string;
+}
+
+const { label, size = 'wide', src, caption } = Astro.props;
+const dims = imageSizes[size];
+const url = src ? asset(`images/${src}`) : '';
+---
+
+<figure class="shot">
+  <div
+    class:list={['frame', { 'has-img': !!src }]}
+    style={`aspect-ratio: ${dims.width} / ${dims.height};`}
+  >
+    {
+      src ? (
+        <a href={url} target="_blank" rel="noopener" title="Abrir imagen completa">
+          <img src={url} alt={label} width={dims.width} height={dims.height} loading="lazy" />
+        </a>
+      ) : (
+        <div>
+          <span class="ph-title">📷 {label}</span>
+          <span class="ph-dim">{dims.width} × {dims.height} px</span>
+          <span class="ph-hint">{dims.label}</span>
+        </div>
+      )
+    }
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>

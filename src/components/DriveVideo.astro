@@ -1,0 +1,98 @@
+---
+import { site } from '../config/environment';
+---
+
+<drive-video data-folder={site.driveVideo.folderId} data-key={site.driveVideo.apiKey} data-name={site.driveVideo.fileName}>
+  <div class="card video-status" role="status" aria-live="polite">
+    <span aria-hidden="true">▶</span>
+    <h3>Video próximamente</h3>
+    <p data-message>Estamos preparando la demostración del invernadero. Vuelve pronto para verla aquí.</p>
+  </div>
+  <div data-player hidden></div>
+  <noscript><p>Activa JavaScript para consultar el video de la demostración.</p></noscript>
+</drive-video>
+
+<script>
+  class DriveVideo extends HTMLElement {
+    private timer?: ReturnType<typeof setTimeout>;
+    private controller?: AbortController;
+
+    connectedCallback() {
+      void this.checkVideo();
+    }
+
+    disconnectedCallback() {
+      clearTimeout(this.timer);
+      this.controller?.abort();
+    }
+
+    private async checkVideo() {
+      const { folder, key, name } = this.dataset;
+      if (!folder || !key || !name) return;
+      const message = this.querySelector<HTMLElement>('[data-message]')!;
+      // Drive exige escapar las comillas y las barras en los valores de q.
+      const escape = (value: string) => value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const params = new URLSearchParams({
+        key,
+        q: `'${escape(folder)}' in parents and name = '${escape(name)}' and trashed = false and mimeType contains 'video/'`,
+        fields: 'files(id,resourceKey)',
+        orderBy: 'createdTime desc',
+        pageSize: '1',
+        supportsAllDrives: 'true',
+        includeItemsFromAllDrives: 'true',
+      });
+      this.controller = new AbortController();
+      const timeout = setTimeout(() => this.controller?.abort(), 15000);
+      try {
+        const response = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`, {
+          signal: this.controller.signal,
+        });
+        if (!response.ok) throw new Error('Drive no disponible');
+        const result = await response.json();
+        const file = result.files?.[0];
+        if (file && /^[\w-]+$/.test(file.id)) {
+          if (!this.isConnected) return;
+          const preview = new URL(`https://drive.google.com/file/d/${file.id}/preview`);
+          const view = new URL(`https://drive.google.com/file/d/${file.id}/view`);
+          if (file.resourceKey) {
+            preview.searchParams.set('resourcekey', file.resourceKey);
+            view.searchParams.set('resourcekey', file.resourceKey);
+          }
+          const iframe = document.createElement('iframe');
+          iframe.className = 'video';
+          iframe.src = preview.href;
+          iframe.title = 'Video del funcionamiento del invernadero';
+          iframe.allow = 'fullscreen';
+          iframe.allowFullscreen = true;
+          iframe.loading = 'lazy';
+          const link = document.createElement('a');
+          link.href = view.href;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Abrir video en Google Drive';
+          const player = this.querySelector<HTMLElement>('[data-player]')!;
+          player.replaceChildren(iframe, link);
+          player.hidden = false;
+          this.querySelector<HTMLElement>('[role="status"]')!.hidden = true;
+          return;
+        }
+        message.textContent = 'Estamos preparando la demostración del invernadero. Vuelve pronto para verla aquí.';
+      } catch {
+        if (!this.isConnected) return;
+        message.textContent = 'No pudimos consultar el video en este momento. Volveremos a intentarlo automáticamente.';
+      } finally {
+        clearTimeout(timeout);
+      }
+      // Detecta nuevas subidas sin recompilar ni recargar la página.
+      if (this.isConnected) this.timer = setTimeout(() => void this.checkVideo(), 60000);
+    }
+  }
+  customElements.define('drive-video', DriveVideo);
+</script>
+
+<style>
+  drive-video { display: block; }
+  .video-status { text-align: center; padding: 3rem 1.5rem; }
+  .video-status span { font-size: 2.5rem; color: var(--color-primary); }
+  .video-status[hidden] { display: none; }
+</style>
